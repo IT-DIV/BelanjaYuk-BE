@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: belanjayuk_api_dev
     ports:
-      - "5000:80"
+      - "5002:80"
     environment:
       - ASPNETCORE_URLS=http://+:80
     volumes:
