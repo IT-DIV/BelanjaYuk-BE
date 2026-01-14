@@ -1,0 +1,26 @@
+name: Deploy Development
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to VPS Dev
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: 22
+          script: |
+            cd /root/BelanjaYuk_Dev
+            git pull origin dev
+            docker-compose -f docker-compose.dev.yml down
+            docker-compose -f docker-compose.dev.yml build --no-cache
+            docker-compose -f docker-compose.dev.yml up -d
+            docker system prune -f
