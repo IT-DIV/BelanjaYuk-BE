@@ -20,7 +20,7 @@ app.UseHttpsRedirection();
 app.MapGet("/", () => new
 {
     status = "OK",
-    message = "BelanjaYuk API is running",
+    message = "BelanjaYuk API is runnings",
     environment = app.Environment.EnvironmentName,
     timestamp = DateTime.UtcNow
 });
