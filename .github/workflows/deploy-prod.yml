@@ -19,13 +19,13 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore BelanjaYuk.API.csproj
 
       - name: Build
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build BelanjaYuk.API.csproj --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test --no-build --verbosity normal || echo "No tests found"
+        run: dotnet test BelanjaYuk.API.csproj --no-build --verbosity normal || echo "No tests found"
 
   deploy:
     needs: build
