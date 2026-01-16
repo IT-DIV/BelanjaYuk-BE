@@ -3,7 +3,7 @@
 public class LoginUserDto
 {
     [Required]
-    public string EmailOrPhone { get; set; }
+    public string EmailOrPhone { get; set; } = string.Empty;
     [Required]
-    public string Password { get; set; }
+    public string Password { get; set; } = string.Empty;
 }
