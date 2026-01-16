@@ -10,5 +10,6 @@
         public decimal DiscountProduct { get; set; }
         public decimal PriceAfterDiscount { get; set; }
         public decimal SubTotal { get; set; }
+        public List<string> Images { get; set; } = new List<string>();
     }
 }
