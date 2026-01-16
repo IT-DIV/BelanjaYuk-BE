@@ -1,6 +1,6 @@
 ﻿public class UserTokenDto
 {
-    //public string Token { get; set; }
+    public string Token { get; set; }
     public string IdUSer { get; set; }
     public DateTime Expiration { get; set; }
     public string Username { get; set; }
