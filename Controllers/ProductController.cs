@@ -120,6 +120,43 @@ public class ProductController : ControllerBase
             return StatusCode(500, $"Gagal menyimpan produk: {ex.Message}");
         }
     }
+    [HttpPost("update/{id}")]
+    public async Task<IActionResult> UpdateProduct(string id, [FromBody] ProductCreateDto productDto)
+    {
+        var product = await _context.MsProducts.FindAsync(id);
+        if (product == null)
+        {
+            return NotFound("Produk tidak ditemukan.");
+        }
+
+        var seller = await _context.MsUserSellers
+            .FirstOrDefaultAsync(s => s.IdUser == productDto.UserId);
+        if (seller == null || product.IdUserSeller != seller.IdUserSeller)
+        {
+            return Forbid("Anda tidak memiliki izin untuk mengubah produk ini.");
+        }
+
+        // Update product fields
+        product.IdCategory = productDto.IdKategori;
+        product.ProductName = productDto.NamaBarang;
+        product.ProductDesc = productDto.DeskripsiBarang;
+        product.Price = productDto.Harga;
+        product.DiscountProduct = productDto.Diskon;
+        product.Qty = productDto.Stok;
+        product.DateUp = DateTime.UtcNow;
+        product.UserUp = productDto.UserId;
+
+        try
+        {
+            await _context.SaveChangesAsync();
+            return Ok(product);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Gagal mengupdate produk: {ex.Message}");
+        }
+    }
+
     [HttpDelete("{userId}/{id}")]
     public async Task<IActionResult> DeleteProduct(string userId, string id)
     {
