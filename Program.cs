@@ -67,6 +67,9 @@ if (app.Environment.IsDevelopment())
 // Enable CORS
 app.UseCors("AllowFrontend");
 
+// Enable Static Files (for serving uploaded images)
+app.UseStaticFiles();
+
 app.UseHttpsRedirection();
 
 // Enable Authentication & Authorization

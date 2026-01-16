@@ -13,6 +13,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
     volumes:
       - ./appsettings.json:/app/appsettings.json:ro
+      - ./wwwroot/uploads:/app/wwwroot/uploads
     restart: unless-stopped
     networks:
       - default

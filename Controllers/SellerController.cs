@@ -95,14 +95,18 @@ public class SellerController : ControllerBase
             );
         }
         var myProducts = await query
-            .Select(p => new ProductSummaryDto
+            .Select(p => new
             {
                 IdProduct = p.IdProduct,
                 ProductName = p.ProductName,
                 Price = p.Price,
                 DiscountProduct = p.DiscountProduct,
                 PriceAfterDiscount = p.Price - (p.Price * p.DiscountProduct / 100),
-                Qty = p.Qty
+                Qty = p.Qty,
+                Images = _context.TrProductImages
+                            .Where(img => img.IdProduct == p.IdProduct && img.IsActive)
+                            .Select(img => img.ProductImage)
+                            .ToList()
             })
             .OrderByDescending(p => p.IdProduct)
             .ToListAsync();
