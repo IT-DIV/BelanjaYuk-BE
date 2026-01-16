@@ -112,7 +112,7 @@ public class ProductController : ControllerBase
             .FirstOrDefaultAsync(s => s.IdUser == UserId);
         if (seller == null)
         {
-            return Forbid("Anda bukan seller terdaftar.");
+            return StatusCode(403, new { message = "Anda bukan seller terdaftar." });
         }
 
         var newProduct = new MsProduct
@@ -250,7 +250,7 @@ public class ProductController : ControllerBase
             .FirstOrDefaultAsync(s => s.IdUser == UserId);
         if (seller == null || product.IdUserSeller != seller.IdUserSeller)
         {
-            return Forbid("Anda tidak memiliki izin untuk mengubah produk ini.");
+            return StatusCode(403, new { message = "Anda tidak memiliki izin untuk mengubah produk ini." });
         }
 
         // Update product fields
@@ -382,7 +382,7 @@ public class ProductController : ControllerBase
         var seller = await _context.MsUserSellers.FirstOrDefaultAsync(s => s.IdUser == userId);
         if (seller == null || product.IdUserSeller != seller.IdUserSeller)
         {
-            return Forbid("Anda tidak memiliki izin untuk menghapus produk ini.");
+            return StatusCode(403, new { message = "Anda tidak memiliki izin untuk menghapus produk ini." });
         }
         product.IsActive = false;
         product.DateUp = DateTime.UtcNow;

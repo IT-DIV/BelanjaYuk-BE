@@ -38,7 +38,7 @@ public class ProductImageController : ControllerBase
         var seller = await _context.MsUserSellers.FirstOrDefaultAsync(s => s.IdUser == userId);
         if (seller == null || product.IdUserSeller != seller.IdUserSeller)
         {
-            return Forbid("Anda tidak memiliki izin untuk mengupload gambar produk ini.");
+            return StatusCode(403, new { message = "Anda tidak memiliki izin untuk mengupload gambar produk ini." });
         }
 
         // Validate images
@@ -178,7 +178,7 @@ public class ProductImageController : ControllerBase
 
         if (seller == null || product.IdUserSeller != seller.IdUserSeller)
         {
-            return Forbid("Anda tidak memiliki izin untuk menghapus gambar ini.");
+            return StatusCode(403, new { message = "Anda tidak memiliki izin untuk menghapus gambar ini." });
         }
 
         try

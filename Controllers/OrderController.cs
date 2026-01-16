@@ -55,7 +55,7 @@ public class OrderController : ControllerBase
         }
         if (transactionDetail.TransactionHeader.IdUser != reviewDto.userId)
         {
-            return Forbid("Anda tidak bisa mengulas barang milik orang lain.");
+            return StatusCode(403, new { message = "Anda tidak bisa mengulas barang milik orang lain." });
         }
         transactionDetail.Rating = reviewDto.Rating;
         transactionDetail.RatingComment = reviewDto.RatingComment;

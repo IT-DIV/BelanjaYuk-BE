@@ -81,7 +81,10 @@ public class SellerController : ControllerBase
     {       
         var seller = await _context.MsUserSellers
             .FirstOrDefaultAsync(s => s.IdUser == userId);
-        if (seller == null) return Forbid("Anda bukan seller terdaftar.");
+        if (seller == null)
+        {
+            return StatusCode(403, new { message = "Anda bukan seller terdaftar." });
+        }
         var query = _context.MsProducts
             .Where(p => p.IdUserSeller == seller.IdUserSeller && p.IsActive);
         if (!string.IsNullOrEmpty(searchQuery))
