@@ -165,7 +165,6 @@ public class ProductImageController : ControllerBase
     public async Task<IActionResult> DeleteProductImage(string imageId, [FromQuery] string userId)
     {
         var productImage = await _context.TrProductImages
-            .Include(img => img.IdProductNavigation)
             .FirstOrDefaultAsync(img => img.IdProductImages == imageId);
 
         if (productImage == null)
