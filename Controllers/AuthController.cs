@@ -29,6 +29,24 @@ public class AuthController : ControllerBase
         {
             return BadRequest("Minimal umur 13 tahun.");
         }
+
+        // Check if email already exists
+        if (await _context.MsUsers.AnyAsync(u => u.Email == registerDto.Email))
+        {
+            return BadRequest("Email sudah terdaftar.");
+        }
+
+        // Check if username already exists
+        if (await _context.MsUsers.AnyAsync(u => u.UserName == registerDto.Username))
+        {
+            return BadRequest("Username sudah digunakan.");
+        }
+
+        // Check if phone number already exists
+        if (await _context.MsUsers.AnyAsync(u => u.PhoneNumber == registerDto.NoHP))
+        {
+            return BadRequest("Nomor HP sudah terdaftar.");
+        }
         var newUser = new MsUser
         {
             IdUser = Guid.NewGuid().ToString(),
