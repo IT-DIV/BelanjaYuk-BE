@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using BelanjaYuk.API.Models;
 using BelanjaYuk.API.Dtos.Auth;
 using Microsoft.Data.SqlClient;
+using Microsoft.AspNetCore.Authorization;
 
 [Route("api/v1/auth")]
 [ApiController]
@@ -205,6 +206,67 @@ public class AuthController : ControllerBase
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    [Authorize]
+    [HttpGet("verify")]
+    public async Task<IActionResult> VerifyToken()
+    {
+        // Get userId from JWT token claims
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("sub");
+
+        if (userIdClaim == null)
+        {
+            return Unauthorized(new { message = "Token tidak valid." });
+        }
+
+        var userId = userIdClaim.Value;
+
+        // Check if user exists and is active
+        var user = await _context.MsUsers
+            .Where(u => u.IdUser == userId && u.IsActive)
+            .Select(u => new
+            {
+                u.IdUser,
+                u.UserName,
+                u.Email,
+                u.FirstName,
+                u.PhoneNumber
+            })
+            .FirstOrDefaultAsync();
+
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User tidak ditemukan atau tidak aktif." });
+        }
+
+        // Check if user is a seller
+        var seller = await _context.MsUserSellers
+            .Where(s => s.IdUser == userId && s.IsActive)
+            .Select(s => new { s.SellerName, s.IdUserSeller })
+            .FirstOrDefaultAsync();
+
+        var roles = new List<string> { "buyer" };
+        if (seller != null)
+        {
+            roles.Add("seller");
+        }
+
+        return Ok(new
+        {
+            isValid = true,
+            user = new
+            {
+                idUser = user.IdUser,
+                username = user.UserName,
+                email = user.Email,
+                firstName = user.FirstName,
+                phoneNumber = user.PhoneNumber,
+                roles = roles,
+                storeName = seller?.SellerName ?? "",
+                idUserSeller = seller?.IdUserSeller ?? ""
+            }
+        });
     }
 
 }
