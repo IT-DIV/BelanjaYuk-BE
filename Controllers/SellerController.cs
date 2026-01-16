@@ -20,11 +20,35 @@ public class SellerController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> RegisterSeller([FromBody] RegisterSellerDto registerDto)
     {
-
+        // Check if user already registered as seller
         bool alreadySeller = await _context.MsUserSellers.AnyAsync(s => s.IdUser == registerDto.userId);
         if (alreadySeller)
         {
             return BadRequest("User ini sudah terdaftar sebagai seller.");
+        }
+
+        // Check if seller name already exists
+        bool sellerNameExists = await _context.MsUserSellers.AnyAsync(s => s.SellerName == registerDto.NamaToko && s.IsActive);
+        if (sellerNameExists)
+        {
+            return BadRequest("Nama toko sudah digunakan.");
+        }
+
+        // Check if seller code (URL) already exists
+        bool sellerCodeExists = await _context.MsUserSellers.AnyAsync(s => s.SellerCode == registerDto.UrlToko && s.IsActive);
+        if (sellerCodeExists)
+        {
+            return BadRequest("URL toko sudah digunakan.");
+        }
+
+        // Check if phone number already exists (if provided)
+        if (!string.IsNullOrEmpty(registerDto.NoHpToko))
+        {
+            bool phoneExists = await _context.MsUserSellers.AnyAsync(s => s.PhoneNumber == registerDto.NoHpToko && s.IsActive);
+            if (phoneExists)
+            {
+                return BadRequest("Nomor HP toko sudah digunakan.");
+            }
         }
         var newSeller = new MsUserSeller
         {
@@ -47,16 +71,8 @@ public class SellerController : ControllerBase
             await _context.SaveChangesAsync();
             return Ok(newSeller);
         }
-        catch (DbUpdateException ex)
+        catch (Exception ex)
         {
-            if (ex.InnerException is SqlException sqlEx &&
-                (sqlEx.Number == 2601 || sqlEx.Number == 2627))
-            {
-                if (sqlEx.Message.Contains("SellerCode") || sqlEx.Message.Contains("UrlToko"))
-                {
-                    return BadRequest("URL toko sudah digunakan.");
-                }
-            }
             return StatusCode(500, $"Terjadi error internal: {ex.Message}");
         }
     }
