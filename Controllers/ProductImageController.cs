@@ -85,7 +85,7 @@ public class ProductImageController : ControllerBase
 
                 // Save to database (store relative URL path)
                 var imageUrl = $"/uploads/products/{productId}/{fileName}";
-                var productImage = new TrProductImage
+                var productImage = new TrProductImages
                 {
                     IdProductImages = Guid.NewGuid().ToString(),
                     IdProduct = productId,
@@ -176,7 +176,7 @@ public class ProductImageController : ControllerBase
         var product = await _context.MsProducts.FindAsync(productImage.IdProduct);
         var seller = await _context.MsUserSellers.FirstOrDefaultAsync(s => s.IdUser == userId);
 
-        if (seller == null || product.IdUserSeller != seller.IdUserSeller)
+        if (seller == null || product?.IdUserSeller != seller.IdUserSeller)
         {
             return StatusCode(403, new { message = "Anda tidak memiliki izin untuk menghapus gambar ini." });
         }
