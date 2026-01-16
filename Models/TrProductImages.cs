@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BelanjaYuk.API.Models
 {
-    [Table("TrProductimages")]
+    [Table("TrProductImages")]
     public class TrProductImages
     {
         [Key]
