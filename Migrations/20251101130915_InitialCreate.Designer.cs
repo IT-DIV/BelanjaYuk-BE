@@ -498,7 +498,7 @@ namespace BelanjaYuk.API.Migrations
                     b.ToTable("TrHomeAddress", (string)null);
                 });
 
-            modelBuilder.Entity("BelanjaYuk.API.Models.TrProductImage", b =>
+            modelBuilder.Entity("BelanjaYuk.API.Models.TrProductImages", b =>
                 {
                     b.Property<string>("IdProductImages")
                         .HasColumnType("nvarchar(450)");
@@ -530,7 +530,7 @@ namespace BelanjaYuk.API.Migrations
 
                     b.HasKey("IdProductImages");
 
-                    b.ToTable("TrProductImage", (string)null);
+                    b.ToTable("TrProductImages", (string)null);
                 });
 #pragma warning restore 612, 618
         }
