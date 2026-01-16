@@ -178,7 +178,7 @@ public class ProductController : ControllerBase
 
                         // Save to database
                         var imageUrl = $"/uploads/products/{newProduct.IdProduct}/{fileName}";
-                        var productImage = new TrProductImage
+                        var productImage = new TrProductImages
                         {
                             IdProductImages = Guid.NewGuid().ToString(),
                             IdProduct = newProduct.IdProduct,
@@ -308,7 +308,7 @@ public class ProductController : ControllerBase
 
                         // Save to database
                         var imageUrl = $"/uploads/products/{product.IdProduct}/{fileName}";
-                        var productImage = new TrProductImage
+                        var productImage = new TrProductImages
                         {
                             IdProductImages = Guid.NewGuid().ToString(),
                             IdProduct = product.IdProduct,

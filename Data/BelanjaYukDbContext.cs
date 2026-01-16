@@ -10,9 +10,9 @@ namespace BelanjaYuk.API.Models
     public abstract class BaseAuditableEntity
     {
         public DateTime DateIn { get; set; }
-        public string UserIn { get; set; }
+        public string? UserIn { get; set; }
         public DateTime DateUp { get; set; }
-        public string UserUp { get; set; }
+        public string? UserUp { get; set; }
         public bool IsActive { get; set; }
     }
 }
@@ -32,7 +32,7 @@ public class BelanjaYukDbContext : DbContext
     public DbSet<TrBuyerTransaction> TrBuyerTransactions { get; set; }
     public DbSet<TrBuyerTransactionDetail> TrBuyerTransactionDetails { get; set; }
     public DbSet<TrHomeAddress> TrHomeAddresses { get; set; }
-    public DbSet<TrProductImage> TrProductImages { get; set; }
+    public DbSet<TrProductImages> TrProductImages { get; set; }
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var entries = ChangeTracker.Entries<BaseAuditableEntity>();
@@ -71,6 +71,6 @@ public class BelanjaYukDbContext : DbContext
         modelBuilder.Entity<TrBuyerTransaction>().ToTable("TrBuyerTransaction");
         modelBuilder.Entity<TrBuyerTransactionDetail>().ToTable("TrBuyerTransactionDetail");
         modelBuilder.Entity<TrHomeAddress>().ToTable("TrHomeAddress");
-        modelBuilder.Entity<TrProductImage>().ToTable("TrProductImage");
+        modelBuilder.Entity<TrProductImages>().ToTable("TrProductImage");
     }
 }

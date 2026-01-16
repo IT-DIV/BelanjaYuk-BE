@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 namespace BelanjaYuk.API.Models
 {
     [Table("TrProductimages")]
-    public class TrProductImage
+    public class TrProductImages
     {
         [Key]
         public string IdProductImages { get; set; } = string.Empty;
