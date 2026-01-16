@@ -14,3 +14,10 @@ services:
     volumes:
       - ./appsettings.json:/app/appsettings.json:ro
     restart: unless-stopped
+    networks:
+      - default
+      - sql_belanjayuk_default
+
+networks:
+  sql_belanjayuk_default:
+    external: true
