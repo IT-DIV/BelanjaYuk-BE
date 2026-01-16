@@ -71,6 +71,6 @@ public class BelanjaYukDbContext : DbContext
         modelBuilder.Entity<TrBuyerTransaction>().ToTable("TrBuyerTransaction");
         modelBuilder.Entity<TrBuyerTransactionDetail>().ToTable("TrBuyerTransactionDetail");
         modelBuilder.Entity<TrHomeAddress>().ToTable("TrHomeAddress");
-        modelBuilder.Entity<TrProductImages>().ToTable("TrProductImage");
+        modelBuilder.Entity<TrProductImages>().ToTable("TrProductImages");
     }
 }
