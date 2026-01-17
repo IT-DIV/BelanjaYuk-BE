@@ -9,5 +9,6 @@
         public decimal PriceAtTransaction { get; set; }
         public int Rating { get; set; }
         public string RatingComment { get; set; }
+        public List<string> Images { get; set; } = new List<string>();
     }
 }

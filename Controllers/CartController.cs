@@ -49,7 +49,7 @@ public class CartController : ControllerBase
     }
     [HttpGet("cart/{userId}")]
     public async Task<IActionResult> GetCart(string userId)
-    {     
+    {
         if (string.IsNullOrEmpty(userId)) return Unauthorized();
         var cartItems = await _context.TrBuyerCarts
             .Where(c => c.IdUser == userId && c.IsActive)
@@ -65,7 +65,11 @@ public class CartController : ControllerBase
                       Price = product.Price,
                       DiscountProduct = product.DiscountProduct,
                       PriceAfterDiscount = product.Price - (product.Price * product.DiscountProduct / 100),
-                      SubTotal = cart.Qty * (product.Price - (product.Price * product.DiscountProduct / 100))
+                      SubTotal = cart.Qty * (product.Price - (product.Price * product.DiscountProduct / 100)),
+                      Images = _context.TrProductImages
+                                  .Where(img => img.IdProduct == product.IdProduct && img.IsActive)
+                                  .Select(img => img.ProductImage)
+                                  .ToList()
                   })
             .ToListAsync();
         return Ok(cartItems);

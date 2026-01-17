@@ -12,4 +12,12 @@ services:
       - ASPNETCORE_URLS=http://+:80
     volumes:
       - ./appsettings.json:/app/appsettings.json:ro
+      - ./wwwroot/uploads:/app/wwwroot/uploads
     restart: unless-stopped
+    networks:
+      - default
+      - sql_belanjayuk_default
+
+networks:
+  sql_belanjayuk_default:
+    external: true

@@ -235,7 +235,7 @@ namespace BelanjaYuk.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "TrProductImage",
+                name: "TrProductImages",
                 columns: table => new
                 {
                     IdProductImages = table.Column<string>(type: "nvarchar(450)", nullable: false),
@@ -249,7 +249,7 @@ namespace BelanjaYuk.API.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TrProductImage", x => x.IdProductImages);
+                    table.PrimaryKey("PK_TrProductImages", x => x.IdProductImages);
                 });
         }
 
@@ -290,7 +290,7 @@ namespace BelanjaYuk.API.Migrations
                 name: "TrHomeAddress");
 
             migrationBuilder.DropTable(
-                name: "TrProductImage");
+                name: "TrProductImages");
         }
     }
 }

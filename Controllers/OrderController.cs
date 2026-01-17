@@ -14,11 +14,25 @@ public class OrderController : ControllerBase
         _context = context;
     }
     [HttpGet("cart/{userId}")]
-    public async Task<IActionResult> GetMyOrders(string userId)
+    public async Task<IActionResult> GetMyOrders(string userId, [FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
     {
         if (string.IsNullOrEmpty(userId)) return Unauthorized();
-        var transactions = await _context.TrBuyerTransactions
-            .Where(t => t.IdUser == userId && t.IsActive)
+
+        var query = _context.TrBuyerTransactions
+            .Where(t => t.IdUser == userId && t.IsActive);
+
+        if (startDate.HasValue)
+        {
+            query = query.Where(t => t.DateIn >= startDate.Value);
+        }
+
+        if (endDate.HasValue)
+        {
+            var endOfDay = endDate.Value.Date.AddDays(1).AddTicks(-1);
+            query = query.Where(t => t.DateIn <= endOfDay);
+        }
+
+        var transactions = await query
             .OrderByDescending(t => t.DateIn)
             .Select(t => new OrderHeaderDto
             {
@@ -35,7 +49,11 @@ public class OrderController : ControllerBase
                         Qty = d.Qty,
                         PriceAtTransaction = d.PriceProduct,
                         Rating = d.Rating,
-                        RatingComment = d.RatingComment
+                        RatingComment = d.RatingComment,
+                        Images = _context.TrProductImages
+                                    .Where(img => img.IdProduct == d.IdProduct && img.IsActive)
+                                    .Select(img => img.ProductImage)
+                                    .ToList()
                     })
                     .ToList()
             })
@@ -55,7 +73,7 @@ public class OrderController : ControllerBase
         }
         if (transactionDetail.TransactionHeader.IdUser != reviewDto.userId)
         {
-            return Forbid("Anda tidak bisa mengulas barang milik orang lain.");
+            return StatusCode(403, new { message = "Anda tidak bisa mengulas barang milik orang lain." });
         }
         transactionDetail.Rating = reviewDto.Rating;
         transactionDetail.RatingComment = reviewDto.RatingComment;

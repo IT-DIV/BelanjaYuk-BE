@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using BelanjaYuk.API.Models;
 using BelanjaYuk.API.Dtos.Auth;
 using Microsoft.Data.SqlClient;
+using Microsoft.AspNetCore.Authorization;
 
 [Route("api/v1/auth")]
 [ApiController]
@@ -28,6 +29,24 @@ public class AuthController : ControllerBase
         if (registerDto.TanggalLahir > DateTime.Today.AddYears(-13))
         {
             return BadRequest("Minimal umur 13 tahun.");
+        }
+
+        // Check if email already exists
+        if (await _context.MsUsers.AnyAsync(u => u.Email == registerDto.Email))
+        {
+            return BadRequest("Email sudah terdaftar.");
+        }
+
+        // Check if username already exists
+        if (await _context.MsUsers.AnyAsync(u => u.UserName == registerDto.Username))
+        {
+            return BadRequest("Username sudah digunakan.");
+        }
+
+        // Check if phone number already exists
+        if (await _context.MsUsers.AnyAsync(u => u.PhoneNumber == registerDto.NoHP))
+        {
+            return BadRequest("Nomor HP sudah terdaftar.");
         }
         var newUser = new MsUser
         {
@@ -65,10 +84,10 @@ public class AuthController : ControllerBase
             {
                 IdHomeAddress = Guid.NewGuid().ToString(),
                 IdUser = newUser.IdUser,
-                Provinsi = registerDto.AlamatUtama.Provinsi,
-                KotaKabupaten = registerDto.AlamatUtama.KotaKabupaten,
-                Kecamatan = registerDto.AlamatUtama.Kecamatan,
-                KodePos = registerDto.AlamatUtama.KodePos,
+                Provinsi = registerDto.AlamatUtama.Provinsi ?? string.Empty,
+                KotaKabupaten = registerDto.AlamatUtama.KotaKabupaten ?? string.Empty,
+                Kecamatan = registerDto.AlamatUtama.Kecamatan ?? string.Empty,
+                KodePos = registerDto.AlamatUtama.KodePos ?? string.Empty,
                 HomeAddressDesc = registerDto.AlamatUtama.AlamatLengkap,
                 IsPrimaryAddress = true,
                 IsActive = true,
@@ -139,18 +158,115 @@ public class AuthController : ControllerBase
         currentRoles2.Add("seller");
 
 
+        var expiration = DateTime.UtcNow.AddHours(2);
+        var token = GenerateJwtToken(user.IdUser, user.UserName, (seller != null ? currentRoles2 : currentRoles), expiration);
+
         var returnResult = new UserTokenDto()
         {
+            Token = token,
             IdUSer = user.IdUser,
-            Expiration = DateTime.Now.AddHours(2),
+            Expiration = expiration,
             Roles = (seller != null ? currentRoles2 : currentRoles),
             Username = user.UserName,
             StoreName = (seller != null ? seller.SellerName : ""),
         };
 
-         
+
         return Ok(returnResult);
     }
-   
+
+    private string GenerateJwtToken(string userId, string username, List<string> roles, DateTime expiration)
+    {
+        var jwtKey = _configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key is not configured");
+        var jwtIssuer = _configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("JWT Issuer is not configured");
+        var jwtAudience = _configuration["Jwt:Audience"] ?? throw new InvalidOperationException("JWT Audience is not configured");
+
+        var securityKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(jwtKey));
+        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+        var claims = new List<Claim>
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, userId),
+            new Claim(JwtRegisteredClaimNames.UniqueName, username),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+        };
+
+        // Add roles as claims
+        foreach (var role in roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
+
+        var token = new JwtSecurityToken(
+            issuer: jwtIssuer,
+            audience: jwtAudience,
+            claims: claims,
+            expires: expiration,
+            signingCredentials: credentials
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    [Authorize]
+    [HttpGet("verify")]
+    public async Task<IActionResult> VerifyToken()
+    {
+        // Get userId from JWT token claims
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("sub");
+
+        if (userIdClaim == null)
+        {
+            return Unauthorized(new { message = "Token tidak valid." });
+        }
+
+        var userId = userIdClaim.Value;
+
+        // Check if user exists and is active
+        var user = await _context.MsUsers
+            .Where(u => u.IdUser == userId && u.IsActive)
+            .Select(u => new
+            {
+                u.IdUser,
+                u.UserName,
+                u.Email,
+                u.FirstName,
+                u.PhoneNumber
+            })
+            .FirstOrDefaultAsync();
+
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User tidak ditemukan atau tidak aktif." });
+        }
+
+        // Check if user is a seller
+        var seller = await _context.MsUserSellers
+            .Where(s => s.IdUser == userId && s.IsActive)
+            .Select(s => new { s.SellerName, s.IdUserSeller })
+            .FirstOrDefaultAsync();
+
+        var roles = new List<string> { "buyer" };
+        if (seller != null)
+        {
+            roles.Add("seller");
+        }
+
+        return Ok(new
+        {
+            isValid = true,
+            user = new
+            {
+                idUser = user.IdUser,
+                username = user.UserName,
+                email = user.Email,
+                firstName = user.FirstName,
+                phoneNumber = user.PhoneNumber,
+                roles = roles,
+                storeName = seller?.SellerName ?? "",
+                idUserSeller = seller?.IdUserSeller ?? ""
+            }
+        });
+    }
 
 }
