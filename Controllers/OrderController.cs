@@ -35,7 +35,11 @@ public class OrderController : ControllerBase
                         Qty = d.Qty,
                         PriceAtTransaction = d.PriceProduct,
                         Rating = d.Rating,
-                        RatingComment = d.RatingComment
+                        RatingComment = d.RatingComment,
+                        Images = _context.TrProductImages
+                                    .Where(img => img.IdProduct == d.IdProduct && img.IsActive)
+                                    .Select(img => img.ProductImage)
+                                    .ToList()
                     })
                     .ToList()
             })
