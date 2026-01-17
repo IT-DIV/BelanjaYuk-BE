@@ -14,11 +14,25 @@ public class OrderController : ControllerBase
         _context = context;
     }
     [HttpGet("cart/{userId}")]
-    public async Task<IActionResult> GetMyOrders(string userId)
+    public async Task<IActionResult> GetMyOrders(string userId, [FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
     {
         if (string.IsNullOrEmpty(userId)) return Unauthorized();
-        var transactions = await _context.TrBuyerTransactions
-            .Where(t => t.IdUser == userId && t.IsActive)
+
+        var query = _context.TrBuyerTransactions
+            .Where(t => t.IdUser == userId && t.IsActive);
+
+        if (startDate.HasValue)
+        {
+            query = query.Where(t => t.DateIn >= startDate.Value);
+        }
+
+        if (endDate.HasValue)
+        {
+            var endOfDay = endDate.Value.Date.AddDays(1).AddTicks(-1);
+            query = query.Where(t => t.DateIn <= endOfDay);
+        }
+
+        var transactions = await query
             .OrderByDescending(t => t.DateIn)
             .Select(t => new OrderHeaderDto
             {
